@@ -1,0 +1,1232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#050207">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Love 1v1">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Love 1v1</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{
+  min-height:100%;
+  min-height:-webkit-fill-available;
+  background:#050207;
+}
+body{
+  margin:0;
+  min-height:100vh;
+  min-height:100svh;
+  min-height:-webkit-fill-available;
+  font-family:Inter,Arial,sans-serif;
+  color:white;
+  background:#050207;
+  overflow-x:hidden;
+  overscroll-behavior:none;
+  touch-action:manipulation;
+  -webkit-user-select:none;
+  user-select:none;
+}
+.bg{position:fixed;inset:0;z-index:0;overflow:hidden}
+.bg img,.bg video{width:100%;height:100%;object-fit:cover;filter:brightness(.45) saturate(1.15)}
+.bg::after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 20% 0%,rgba(255,65,135,.35),transparent 35%),radial-gradient(circle at 90% 15%,rgba(120,70,255,.35),transparent 38%),linear-gradient(160deg,rgba(5,2,7,.78),rgba(10,3,18,.92))}
+.app{
+  position:relative;
+  z-index:2;
+  width:min(560px,100%);
+  min-height:100svh;
+  margin:auto;
+  padding:calc(18px + env(safe-area-inset-top)) 18px calc(22px + env(safe-area-inset-bottom));
+  display:flex;
+  flex-direction:column;
+}
+.hero{padding:18px 3px 12px}
+.badge{display:inline-block;padding:9px 13px;border-radius:999px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.14);color:#ffd7e6;font-size:13px}
+h1{font-size:44px;margin:15px 0 6px;letter-spacing:-1.5px}
+.sub{color:#d8c7e0;line-height:1.55;font-size:15px}
+.card{background:linear-gradient(180deg,rgba(255,255,255,.13),rgba(255,255,255,.065));border:1px solid rgba(255,255,255,.14);border-radius:28px;padding:17px;margin-bottom:14px;box-shadow:0 24px 70px rgba(0,0,0,.45)}
+input{
+  width:100%;
+  padding:16px;
+  border-radius:17px;
+  border:1px solid rgba(255,255,255,.14);
+  background:rgba(255,255,255,.09);
+  color:white;
+  outline:none;
+  margin:7px 0;
+  font-size:16px;
+  -webkit-user-select:text;
+  user-select:text;
+}
+input::placeholder{color:#bca8c9}
+button{
+  border:0;
+  border-radius:17px;
+  padding:15px 15px;
+  color:white;
+  font-weight:900;
+  font-size:15px;
+  background:linear-gradient(135deg,#ff3f86,#864cff);
+  cursor:pointer;
+  min-height:48px;
+}
+button.secondary{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.13)}
+button:active{transform:scale(.97)}
+.row{display:flex;gap:10px}.row button{flex:1}.hide{display:none}
+.avatar-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:10px 0}
+.avatar-box{text-align:center;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:22px;padding:12px}
+.avatar{width:92px;height:92px;border-radius:50%;object-fit:cover;background:rgba(255,255,255,.09);border:3px solid rgba(255,255,255,.23)}
+label{display:block;color:#ffd7e6;font-size:13px;margin-top:8px}
+.scoreboard{display:grid;grid-template-columns:1fr 60px 1fr;gap:10px;align-items:center}
+.player{text-align:center;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:24px;padding:13px}
+.player .avatar{width:72px;height:72px;margin-bottom:7px}
+.name{color:#ffd2e4;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.score{font-size:42px;font-weight:1000}
+.vs{text-align:center;font-weight:1000;color:#ffe4ef}
+.categories{display:flex;gap:8px;overflow:auto;padding-bottom:4px}
+.cat{white-space:nowrap;box-shadow:none;padding:10px 13px;font-size:13px;color:#dccdde}
+.cat.active{background:linear-gradient(135deg,#ff3f86,#864cff);color:white}
+.meta{display:flex;justify-content:space-between;color:#cbb8d6;font-size:13px;margin-bottom:14px}
+.question{min-height:190px;display:flex;align-items:center;justify-content:center;text-align:center;font-size:27px;line-height:1.3;font-weight:950;letter-spacing:-.7px;animation:pop .25s ease}
+@keyframes pop{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+.winner{text-align:center;color:#ffd66b;font-size:18px;font-weight:900}
+.history{max-height:170px;overflow:auto;color:#dacfe0;font-size:14px;line-height:1.7}
+.small{color:#bda9c9;font-size:13px;line-height:1.45}
+
+/* iPhone home-screen app polish */
+@supports (-webkit-touch-callout:none){
+  .card{backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+  input,button{font-family:-apple-system,BlinkMacSystemFont,"Inter",Arial,sans-serif}
+}
+
+#game{
+  padding-bottom:env(safe-area-inset-bottom);
+}
+
+.question{
+  word-break:normal;
+}
+
+.file-help{
+  color:#bda9c9;
+  font-size:12px;
+  margin-top:6px;
+}
+
+@media(max-width:430px){
+  .app{
+    width:100%;
+    padding:calc(14px + env(safe-area-inset-top)) 14px calc(18px + env(safe-area-inset-bottom));
+  }
+  .hero{
+    padding-top:10px;
+  }
+  h1{
+    font-size:40px;
+  }
+  .card{
+    border-radius:26px;
+    padding:15px;
+  }
+  .scoreboard{
+    grid-template-columns:1fr 44px 1fr;
+    gap:8px;
+  }
+  .player{
+    padding:11px 9px;
+  }
+  .player .avatar{
+    width:64px;
+    height:64px;
+  }
+  .score{
+    font-size:38px;
+  }
+  .question{
+    min-height:175px;
+    font-size:23px;
+    line-height:1.35;
+  }
+  .categories{
+    scrollbar-width:none;
+  }
+  .categories::-webkit-scrollbar{
+    display:none;
+  }
+}
+
+@media(max-width:390px){.app{padding:14px}h1{font-size:38px}.question{font-size:23px}}
+</style>
+</head>
+<body>
+<div class="bg" id="bg"></div>
+<div class="app">
+  <div class="hero">
+    <div class="badge">💗 Couple Game • 100 questions each category</div>
+    <h1>Love 1v1</h1>
+    <div class="sub">No repeat mode fixed: every Next gives a new unused question in that category until all 100 are finished.</div>
+  </div>
+
+  <div id="setup" class="card">
+    <input id="p1name" placeholder="Your name">
+    <input id="p2name" placeholder="Her name">
+    <div class="avatar-row">
+      <div class="avatar-box">
+        <img id="p1preview" class="avatar">
+        <label>Your photo</label>
+        <input type="file" accept="image/*" onchange="loadPhoto(event,1)">
+      </div>
+      <div class="avatar-box">
+        <img id="p2preview" class="avatar">
+        <label>Her photo</label>
+        <input type="file" accept="image/*" onchange="loadPhoto(event,2)">
+      </div>
+    </div>
+    <label>Background photo or video</label>
+    <input type="file" accept="image/*,video/*" onchange="loadBackground(event)">
+    <div class="row" style="margin-top:10px">
+      <button onclick="startGame()">Start Game</button>
+      <button class="secondary" onclick="autoNames()">Auto</button>
+    </div>
+    <p class="small">Tap Read for voice. On iPhone: open in Safari → Share → Add to Home Screen. It will feel like an app.</p>
+  </div>
+
+  <div id="game" class="hide">
+    <div class="card scoreboard">
+      <div class="player">
+        <img id="p1game" class="avatar">
+        <div id="p1label" class="name">You</div>
+        <div id="p1score" class="score">0</div>
+        <button onclick="addScore(1)">+1</button>
+      </div>
+      <div class="vs">VS</div>
+      <div class="player">
+        <img id="p2game" class="avatar">
+        <div id="p2label" class="name">Her</div>
+        <div id="p2score" class="score">0</div>
+        <button onclick="addScore(2)">+1</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="categories">
+        <button class="cat active" onclick="setCategory('romantic',this)">Romantic</button>
+        <button class="cat" onclick="setCategory('funny',this)">Funny</button>
+        <button class="cat" onclick="setCategory('toxic',this)">Toxic</button>
+        <button class="cat" onclick="setCategory('deep',this)">Deep</button>
+        <button class="cat" onclick="setCategory('truth',this)">Truth</button>
+        <button class="cat" onclick="setCategory('future',this)">Future</button>
+        <button class="cat" onclick="setCategory('cute',this)">Cute</button>
+        <button class="cat" onclick="setCategory('random',this)">Random</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="meta">
+        <span id="roundText">Round 1</span>
+        <span id="catText">Romantic</span>
+      </div>
+      <div id="question" class="question"></div>
+      <div class="row">
+        <button onclick="nextQuestion()">Next</button>
+        <button class="secondary" onclick="readQuestion()">🔊 Read</button>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <button class="secondary" onclick="skipQuestion()">Skip</button>
+        <button class="secondary" onclick="toggleAutoRead()" id="autoReadBtn">Auto Voice: Off</button>
+      </div>
+    </div>
+
+    <div class="card winner" id="winner">No winner yet</div>
+    <div class="card">
+      <div class="row">
+        <button class="secondary" onclick="resetScore()">Reset Score</button>
+        <button class="secondary" onclick="restartGame()">Restart</button>
+      </div>
+    </div>
+    <div class="card">
+      <b>History</b>
+      <div id="history" class="history"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+let p1="You",p2="Her",s1=0,s2=0,round=1,category="romantic",currentQuestion="",autoRead=false;
+const banks = {
+  "romantic": [
+    "What moment with me made you feel truly loved? Tell me the real feeling behind it.",
+    "What moment with me made you feel truly loved? Don’t make the answer short.",
+    "What moment with me made you feel truly loved? Say it like we are talking late at night.",
+    "What moment with me made you feel truly loved? Give me a real example.",
+    "What moment with me made you feel truly loved? Be soft but honest.",
+    "What little thing I do makes your heart feel calm? Tell me the real feeling behind it.",
+    "What little thing I do makes your heart feel calm? Don’t make the answer short.",
+    "What little thing I do makes your heart feel calm? Say it like we are talking late at night.",
+    "What little thing I do makes your heart feel calm? Give me a real example.",
+    "What little thing I do makes your heart feel calm? Be soft but honest.",
+    "When did you feel like I was really yours? Tell me the real feeling behind it.",
+    "When did you feel like I was really yours? Don’t make the answer short.",
+    "When did you feel like I was really yours? Say it like we are talking late at night.",
+    "When did you feel like I was really yours? Give me a real example.",
+    "When did you feel like I was really yours? Be soft but honest.",
+    "What memory of us still makes you smile randomly? Tell me the real feeling behind it.",
+    "What memory of us still makes you smile randomly? Don’t make the answer short.",
+    "What memory of us still makes you smile randomly? Say it like we are talking late at night.",
+    "What memory of us still makes you smile randomly? Give me a real example.",
+    "What memory of us still makes you smile randomly? Be soft but honest.",
+    "What is one romantic thing you wish I did more? Tell me the real feeling behind it.",
+    "What is one romantic thing you wish I did more? Don’t make the answer short.",
+    "What is one romantic thing you wish I did more? Say it like we are talking late at night.",
+    "What is one romantic thing you wish I did more? Give me a real example.",
+    "What is one romantic thing you wish I did more? Be soft but honest.",
+    "What part of our love feels different from everyone else? Tell me the real feeling behind it.",
+    "What part of our love feels different from everyone else? Don’t make the answer short.",
+    "What part of our love feels different from everyone else? Say it like we are talking late at night.",
+    "What part of our love feels different from everyone else? Give me a real example.",
+    "What part of our love feels different from everyone else? Be soft but honest.",
+    "When do you feel closest to me? Tell me the real feeling behind it.",
+    "When do you feel closest to me? Don’t make the answer short.",
+    "When do you feel closest to me? Say it like we are talking late at night.",
+    "When do you feel closest to me? Give me a real example.",
+    "When do you feel closest to me? Be soft but honest.",
+    "What do I do that makes you feel chosen? Tell me the real feeling behind it.",
+    "What do I do that makes you feel chosen? Don’t make the answer short.",
+    "What do I do that makes you feel chosen? Say it like we are talking late at night.",
+    "What do I do that makes you feel chosen? Give me a real example.",
+    "What do I do that makes you feel chosen? Be soft but honest.",
+    "What is one promise from me that would mean a lot? Tell me the real feeling behind it.",
+    "What is one promise from me that would mean a lot? Don’t make the answer short.",
+    "What is one promise from me that would mean a lot? Say it like we are talking late at night.",
+    "What is one promise from me that would mean a lot? Give me a real example.",
+    "What is one promise from me that would mean a lot? Be soft but honest.",
+    "What romantic memory should we create next? Tell me the real feeling behind it.",
+    "What romantic memory should we create next? Don’t make the answer short.",
+    "What romantic memory should we create next? Say it like we are talking late at night.",
+    "What romantic memory should we create next? Give me a real example.",
+    "What romantic memory should we create next? Be soft but honest.",
+    "What is your favorite way I show love? Tell me the real feeling behind it.",
+    "What is your favorite way I show love? Don’t make the answer short.",
+    "What is your favorite way I show love? Say it like we are talking late at night.",
+    "What is your favorite way I show love? Give me a real example.",
+    "What is your favorite way I show love? Be soft but honest.",
+    "When did I make you feel safe without knowing? Tell me the real feeling behind it.",
+    "When did I make you feel safe without knowing? Don’t make the answer short.",
+    "When did I make you feel safe without knowing? Say it like we are talking late at night.",
+    "When did I make you feel safe without knowing? Give me a real example.",
+    "When did I make you feel safe without knowing? Be soft but honest.",
+    "What is something I say that stays in your heart? Tell me the real feeling behind it.",
+    "What is something I say that stays in your heart? Don’t make the answer short.",
+    "What is something I say that stays in your heart? Say it like we are talking late at night.",
+    "What is something I say that stays in your heart? Give me a real example.",
+    "What is something I say that stays in your heart? Be soft but honest.",
+    "What kind of date would feel perfect with me? Tell me the real feeling behind it.",
+    "What kind of date would feel perfect with me? Don’t make the answer short.",
+    "What kind of date would feel perfect with me? Say it like we are talking late at night.",
+    "What kind of date would feel perfect with me? Give me a real example.",
+    "What kind of date would feel perfect with me? Be soft but honest.",
+    "What is one thing I do that makes you miss me? Tell me the real feeling behind it.",
+    "What is one thing I do that makes you miss me? Don’t make the answer short.",
+    "What is one thing I do that makes you miss me? Say it like we are talking late at night.",
+    "What is one thing I do that makes you miss me? Give me a real example.",
+    "What is one thing I do that makes you miss me? Be soft but honest.",
+    "What part of me feels like home to you? Tell me the real feeling behind it.",
+    "What part of me feels like home to you? Don’t make the answer short.",
+    "What part of me feels like home to you? Say it like we are talking late at night.",
+    "What part of me feels like home to you? Give me a real example.",
+    "What part of me feels like home to you? Be soft but honest.",
+    "What moment made you think, ‘yeah, this person matters’? Tell me the real feeling behind it.",
+    "What moment made you think, ‘yeah, this person matters’? Don’t make the answer short.",
+    "What moment made you think, ‘yeah, this person matters’? Say it like we are talking late at night.",
+    "What moment made you think, ‘yeah, this person matters’? Give me a real example.",
+    "What moment made you think, ‘yeah, this person matters’? Be soft but honest.",
+    "What is one thing about us you never want to lose? Tell me the real feeling behind it.",
+    "What is one thing about us you never want to lose? Don’t make the answer short.",
+    "What is one thing about us you never want to lose? Say it like we are talking late at night.",
+    "What is one thing about us you never want to lose? Give me a real example.",
+    "What is one thing about us you never want to lose? Be soft but honest.",
+    "What do you secretly love about the way I treat you? Tell me the real feeling behind it.",
+    "What do you secretly love about the way I treat you? Don’t make the answer short.",
+    "What do you secretly love about the way I treat you? Say it like we are talking late at night.",
+    "What do you secretly love about the way I treat you? Give me a real example.",
+    "What do you secretly love about the way I treat you? Be soft but honest.",
+    "What would make you feel more loved by me? Tell me the real feeling behind it.",
+    "What would make you feel more loved by me? Don’t make the answer short.",
+    "What would make you feel more loved by me? Say it like we are talking late at night.",
+    "What would make you feel more loved by me? Give me a real example.",
+    "What would make you feel more loved by me? Be soft but honest."
+  ],
+  "funny": [
+    "Who between us would survive worse in a zombie movie? Be honest and don’t protect me.",
+    "Who between us would survive worse in a zombie movie? Give proof.",
+    "Who between us would survive worse in a zombie movie? Tell the story.",
+    "Who between us would survive worse in a zombie movie? Make the answer funny.",
+    "Who between us would survive worse in a zombie movie? Say the first thing that comes to mind.",
+    "What is the funniest thing I do without noticing? Be honest and don’t protect me.",
+    "What is the funniest thing I do without noticing? Give proof.",
+    "What is the funniest thing I do without noticing? Tell the story.",
+    "What is the funniest thing I do without noticing? Make the answer funny.",
+    "What is the funniest thing I do without noticing? Say the first thing that comes to mind.",
+    "If I became famous tomorrow, what stupid thing would it be for? Be honest and don’t protect me.",
+    "If I became famous tomorrow, what stupid thing would it be for? Give proof.",
+    "If I became famous tomorrow, what stupid thing would it be for? Tell the story.",
+    "If I became famous tomorrow, what stupid thing would it be for? Make the answer funny.",
+    "If I became famous tomorrow, what stupid thing would it be for? Say the first thing that comes to mind.",
+    "What habit of mine is dumb but funny? Be honest and don’t protect me.",
+    "What habit of mine is dumb but funny? Give proof.",
+    "What habit of mine is dumb but funny? Tell the story.",
+    "What habit of mine is dumb but funny? Make the answer funny.",
+    "What habit of mine is dumb but funny? Say the first thing that comes to mind.",
+    "Who would lose their phone first on a trip? Be honest and don’t protect me.",
+    "Who would lose their phone first on a trip? Give proof.",
+    "Who would lose their phone first on a trip? Tell the story.",
+    "Who would lose their phone first on a trip? Make the answer funny.",
+    "Who would lose their phone first on a trip? Say the first thing that comes to mind.",
+    "What would be my most embarrassing superpower? Be honest and don’t protect me.",
+    "What would be my most embarrassing superpower? Give proof.",
+    "What would be my most embarrassing superpower? Tell the story.",
+    "What would be my most embarrassing superpower? Make the answer funny.",
+    "What would be my most embarrassing superpower? Say the first thing that comes to mind.",
+    "If we had a reality show, what would people laugh at? Be honest and don’t protect me.",
+    "If we had a reality show, what would people laugh at? Give proof.",
+    "If we had a reality show, what would people laugh at? Tell the story.",
+    "If we had a reality show, what would people laugh at? Make the answer funny.",
+    "If we had a reality show, what would people laugh at? Say the first thing that comes to mind.",
+    "What phrase do I say that sounds exactly like me? Be honest and don’t protect me.",
+    "What phrase do I say that sounds exactly like me? Give proof.",
+    "What phrase do I say that sounds exactly like me? Tell the story.",
+    "What phrase do I say that sounds exactly like me? Make the answer funny.",
+    "What phrase do I say that sounds exactly like me? Say the first thing that comes to mind.",
+    "Who would laugh at the worst possible time? Be honest and don’t protect me.",
+    "Who would laugh at the worst possible time? Give proof.",
+    "Who would laugh at the worst possible time? Tell the story.",
+    "Who would laugh at the worst possible time? Make the answer funny.",
+    "Who would laugh at the worst possible time? Say the first thing that comes to mind.",
+    "What moment made me look completely unserious? Be honest and don’t protect me.",
+    "What moment made me look completely unserious? Give proof.",
+    "What moment made me look completely unserious? Tell the story.",
+    "What moment made me look completely unserious? Make the answer funny.",
+    "What moment made me look completely unserious? Say the first thing that comes to mind.",
+    "Who would panic first if we got lost? Be honest and don’t protect me.",
+    "Who would panic first if we got lost? Give proof.",
+    "Who would panic first if we got lost? Tell the story.",
+    "Who would panic first if we got lost? Make the answer funny.",
+    "Who would panic first if we got lost? Say the first thing that comes to mind.",
+    "What is my funniest facial expression? Be honest and don’t protect me.",
+    "What is my funniest facial expression? Give proof.",
+    "What is my funniest facial expression? Tell the story.",
+    "What is my funniest facial expression? Make the answer funny.",
+    "What is my funniest facial expression? Say the first thing that comes to mind.",
+    "What do I do that deserves to be a meme? Be honest and don’t protect me.",
+    "What do I do that deserves to be a meme? Give proof.",
+    "What do I do that deserves to be a meme? Tell the story.",
+    "What do I do that deserves to be a meme? Make the answer funny.",
+    "What do I do that deserves to be a meme? Say the first thing that comes to mind.",
+    "Who would embarrass us in public by accident? Be honest and don’t protect me.",
+    "Who would embarrass us in public by accident? Give proof.",
+    "Who would embarrass us in public by accident? Tell the story.",
+    "Who would embarrass us in public by accident? Make the answer funny.",
+    "Who would embarrass us in public by accident? Say the first thing that comes to mind.",
+    "What is the funniest fake rumor someone could make about us? Be honest and don’t protect me.",
+    "What is the funniest fake rumor someone could make about us? Give proof.",
+    "What is the funniest fake rumor someone could make about us? Tell the story.",
+    "What is the funniest fake rumor someone could make about us? Make the answer funny.",
+    "What is the funniest fake rumor someone could make about us? Say the first thing that comes to mind.",
+    "Who would order food and regret it first? Be honest and don’t protect me.",
+    "Who would order food and regret it first? Give proof.",
+    "Who would order food and regret it first? Tell the story.",
+    "Who would order food and regret it first? Make the answer funny.",
+    "Who would order food and regret it first? Say the first thing that comes to mind.",
+    "What would my job title be in our relationship? Be honest and don’t protect me.",
+    "What would my job title be in our relationship? Give proof.",
+    "What would my job title be in our relationship? Tell the story.",
+    "What would my job title be in our relationship? Make the answer funny.",
+    "What would my job title be in our relationship? Say the first thing that comes to mind.",
+    "What argument of ours would sound stupid to other people? Be honest and don’t protect me.",
+    "What argument of ours would sound stupid to other people? Give proof.",
+    "What argument of ours would sound stupid to other people? Tell the story.",
+    "What argument of ours would sound stupid to other people? Make the answer funny.",
+    "What argument of ours would sound stupid to other people? Say the first thing that comes to mind.",
+    "Who is more dramatic for no reason? Be honest and don’t protect me.",
+    "Who is more dramatic for no reason? Give proof.",
+    "Who is more dramatic for no reason? Tell the story.",
+    "Who is more dramatic for no reason? Make the answer funny.",
+    "Who is more dramatic for no reason? Say the first thing that comes to mind.",
+    "What is one funny thing only you notice about me? Be honest and don’t protect me.",
+    "What is one funny thing only you notice about me? Give proof.",
+    "What is one funny thing only you notice about me? Tell the story.",
+    "What is one funny thing only you notice about me? Make the answer funny.",
+    "What is one funny thing only you notice about me? Say the first thing that comes to mind."
+  ],
+  "toxic": [
+    "Who gets jealous faster between us? Keep it playful, not mean.",
+    "Who gets jealous faster between us? Say it with love.",
+    "Who gets jealous faster between us? Explain yourself.",
+    "Who gets jealous faster between us? Don’t start a real fight.",
+    "Who gets jealous faster between us? Tell me how we can fix it.",
+    "What do I do that annoys you but you still like me? Keep it playful, not mean.",
+    "What do I do that annoys you but you still like me? Say it with love.",
+    "What do I do that annoys you but you still like me? Explain yourself.",
+    "What do I do that annoys you but you still like me? Don’t start a real fight.",
+    "What do I do that annoys you but you still like me? Tell me how we can fix it.",
+    "Who acts cold first after an argument? Keep it playful, not mean.",
+    "Who acts cold first after an argument? Say it with love.",
+    "Who acts cold first after an argument? Explain yourself.",
+    "Who acts cold first after an argument? Don’t start a real fight.",
+    "Who acts cold first after an argument? Tell me how we can fix it.",
+    "What do I do that gives attitude energy? Keep it playful, not mean.",
+    "What do I do that gives attitude energy? Say it with love.",
+    "What do I do that gives attitude energy? Explain yourself.",
+    "What do I do that gives attitude energy? Don’t start a real fight.",
+    "What do I do that gives attitude energy? Tell me how we can fix it.",
+    "Who checks the other person’s mood first? Keep it playful, not mean.",
+    "Who checks the other person’s mood first? Say it with love.",
+    "Who checks the other person’s mood first? Explain yourself.",
+    "Who checks the other person’s mood first? Don’t start a real fight.",
+    "Who checks the other person’s mood first? Tell me how we can fix it.",
+    "What makes you roll your eyes at me? Keep it playful, not mean.",
+    "What makes you roll your eyes at me? Say it with love.",
+    "What makes you roll your eyes at me? Explain yourself.",
+    "What makes you roll your eyes at me? Don’t start a real fight.",
+    "What makes you roll your eyes at me? Tell me how we can fix it.",
+    "Who is more stubborn even when wrong? Keep it playful, not mean.",
+    "Who is more stubborn even when wrong? Say it with love.",
+    "Who is more stubborn even when wrong? Explain yourself.",
+    "Who is more stubborn even when wrong? Don’t start a real fight.",
+    "Who is more stubborn even when wrong? Tell me how we can fix it.",
+    "What is my most toxic but funny habit? Keep it playful, not mean.",
+    "What is my most toxic but funny habit? Say it with love.",
+    "What is my most toxic but funny habit? Explain yourself.",
+    "What is my most toxic but funny habit? Don’t start a real fight.",
+    "What is my most toxic but funny habit? Tell me how we can fix it.",
+    "Who misses the other first but acts normal? Keep it playful, not mean.",
+    "Who misses the other first but acts normal? Say it with love.",
+    "Who misses the other first but acts normal? Explain yourself.",
+    "Who misses the other first but acts normal? Don’t start a real fight.",
+    "Who misses the other first but acts normal? Tell me how we can fix it.",
+    "What do we argue about that is not even serious? Keep it playful, not mean.",
+    "What do we argue about that is not even serious? Say it with love.",
+    "What do we argue about that is not even serious? Explain yourself.",
+    "What do we argue about that is not even serious? Don’t start a real fight.",
+    "What do we argue about that is not even serious? Tell me how we can fix it.",
+    "Who gives better silent treatment? Keep it playful, not mean.",
+    "Who gives better silent treatment? Say it with love.",
+    "Who gives better silent treatment? Explain yourself.",
+    "Who gives better silent treatment? Don’t start a real fight.",
+    "Who gives better silent treatment? Tell me how we can fix it.",
+    "What would make you say, ‘you are impossible’? Keep it playful, not mean.",
+    "What would make you say, ‘you are impossible’? Say it with love.",
+    "What would make you say, ‘you are impossible’? Explain yourself.",
+    "What would make you say, ‘you are impossible’? Don’t start a real fight.",
+    "What would make you say, ‘you are impossible’? Tell me how we can fix it.",
+    "Who gets dramatic over small things? Keep it playful, not mean.",
+    "Who gets dramatic over small things? Say it with love.",
+    "Who gets dramatic over small things? Explain yourself.",
+    "Who gets dramatic over small things? Don’t start a real fight.",
+    "Who gets dramatic over small things? Tell me how we can fix it.",
+    "What red flag of mine is somehow still cute? Keep it playful, not mean.",
+    "What red flag of mine is somehow still cute? Say it with love.",
+    "What red flag of mine is somehow still cute? Explain yourself.",
+    "What red flag of mine is somehow still cute? Don’t start a real fight.",
+    "What red flag of mine is somehow still cute? Tell me how we can fix it.",
+    "Who pretends not to care first? Keep it playful, not mean.",
+    "Who pretends not to care first? Say it with love.",
+    "Who pretends not to care first? Explain yourself.",
+    "Who pretends not to care first? Don’t start a real fight.",
+    "Who pretends not to care first? Tell me how we can fix it.",
+    "What do I do that tests your patience? Keep it playful, not mean.",
+    "What do I do that tests your patience? Say it with love.",
+    "What do I do that tests your patience? Explain yourself.",
+    "What do I do that tests your patience? Don’t start a real fight.",
+    "What do I do that tests your patience? Tell me how we can fix it.",
+    "Who says ‘nothing’ when something is clearly wrong? Keep it playful, not mean.",
+    "Who says ‘nothing’ when something is clearly wrong? Say it with love.",
+    "Who says ‘nothing’ when something is clearly wrong? Explain yourself.",
+    "Who says ‘nothing’ when something is clearly wrong? Don’t start a real fight.",
+    "Who says ‘nothing’ when something is clearly wrong? Tell me how we can fix it.",
+    "What petty thing between us is actually true? Keep it playful, not mean.",
+    "What petty thing between us is actually true? Say it with love.",
+    "What petty thing between us is actually true? Explain yourself.",
+    "What petty thing between us is actually true? Don’t start a real fight.",
+    "What petty thing between us is actually true? Tell me how we can fix it.",
+    "Who would win the ignoring game? Keep it playful, not mean.",
+    "Who would win the ignoring game? Say it with love.",
+    "Who would win the ignoring game? Explain yourself.",
+    "Who would win the ignoring game? Don’t start a real fight.",
+    "Who would win the ignoring game? Tell me how we can fix it.",
+    "What habit of mine needs fixing? Keep it playful, not mean.",
+    "What habit of mine needs fixing? Say it with love.",
+    "What habit of mine needs fixing? Explain yourself.",
+    "What habit of mine needs fixing? Don’t start a real fight.",
+    "What habit of mine needs fixing? Tell me how we can fix it."
+  ],
+  "deep": [
+    "What do you wish I understood about your heart? Answer slowly and honestly.",
+    "What do you wish I understood about your heart? Say the part you usually hide.",
+    "What do you wish I understood about your heart? Tell me what you really need.",
+    "What do you wish I understood about your heart? Give me a real example.",
+    "What do you wish I understood about your heart? Say it like I am really listening.",
+    "What are you scared to tell me sometimes? Answer slowly and honestly.",
+    "What are you scared to tell me sometimes? Say the part you usually hide.",
+    "What are you scared to tell me sometimes? Tell me what you really need.",
+    "What are you scared to tell me sometimes? Give me a real example.",
+    "What are you scared to tell me sometimes? Say it like I am really listening.",
+    "When do you feel emotionally safe with me? Answer slowly and honestly.",
+    "When do you feel emotionally safe with me? Say the part you usually hide.",
+    "When do you feel emotionally safe with me? Tell me what you really need.",
+    "When do you feel emotionally safe with me? Give me a real example.",
+    "When do you feel emotionally safe with me? Say it like I am really listening.",
+    "What part of you do you want me to protect? Answer slowly and honestly.",
+    "What part of you do you want me to protect? Say the part you usually hide.",
+    "What part of you do you want me to protect? Tell me what you really need.",
+    "What part of you do you want me to protect? Give me a real example.",
+    "What part of you do you want me to protect? Say it like I am really listening.",
+    "What do you hope never changes about us? Answer slowly and honestly.",
+    "What do you hope never changes about us? Say the part you usually hide.",
+    "What do you hope never changes about us? Tell me what you really need.",
+    "What do you hope never changes about us? Give me a real example.",
+    "What do you hope never changes about us? Say it like I am really listening.",
+    "What do you need from me when you are not okay? Answer slowly and honestly.",
+    "What do you need from me when you are not okay? Say the part you usually hide.",
+    "What do you need from me when you are not okay? Tell me what you really need.",
+    "What do you need from me when you are not okay? Give me a real example.",
+    "What do you need from me when you are not okay? Say it like I am really listening.",
+    "What fear do you have about love? Answer slowly and honestly.",
+    "What fear do you have about love? Say the part you usually hide.",
+    "What fear do you have about love? Tell me what you really need.",
+    "What fear do you have about love? Give me a real example.",
+    "What fear do you have about love? Say it like I am really listening.",
+    "What did I help you feel without knowing? Answer slowly and honestly.",
+    "What did I help you feel without knowing? Say the part you usually hide.",
+    "What did I help you feel without knowing? Tell me what you really need.",
+    "What did I help you feel without knowing? Give me a real example.",
+    "What did I help you feel without knowing? Say it like I am really listening.",
+    "What do you want us to heal together? Answer slowly and honestly.",
+    "What do you want us to heal together? Say the part you usually hide.",
+    "What do you want us to heal together? Tell me what you really need.",
+    "What do you want us to heal together? Give me a real example.",
+    "What do you want us to heal together? Say it like I am really listening.",
+    "What makes you feel truly seen by me? Answer slowly and honestly.",
+    "What makes you feel truly seen by me? Say the part you usually hide.",
+    "What makes you feel truly seen by me? Tell me what you really need.",
+    "What makes you feel truly seen by me? Give me a real example.",
+    "What makes you feel truly seen by me? Say it like I am really listening.",
+    "What do you wish I noticed more? Answer slowly and honestly.",
+    "What do you wish I noticed more? Say the part you usually hide.",
+    "What do you wish I noticed more? Tell me what you really need.",
+    "What do you wish I noticed more? Give me a real example.",
+    "What do you wish I noticed more? Say it like I am really listening.",
+    "What do you need when you go quiet? Answer slowly and honestly.",
+    "What do you need when you go quiet? Say the part you usually hide.",
+    "What do you need when you go quiet? Tell me what you really need.",
+    "What do you need when you go quiet? Give me a real example.",
+    "What do you need when you go quiet? Say it like I am really listening.",
+    "What has love taught you because of us? Answer slowly and honestly.",
+    "What has love taught you because of us? Say the part you usually hide.",
+    "What has love taught you because of us? Tell me what you really need.",
+    "What has love taught you because of us? Give me a real example.",
+    "What has love taught you because of us? Say it like I am really listening.",
+    "What part of yourself do you hide from people? Answer slowly and honestly.",
+    "What part of yourself do you hide from people? Say the part you usually hide.",
+    "What part of yourself do you hide from people? Tell me what you really need.",
+    "What part of yourself do you hide from people? Give me a real example.",
+    "What part of yourself do you hide from people? Say it like I am really listening.",
+    "What should I handle more gently? Answer slowly and honestly.",
+    "What should I handle more gently? Say the part you usually hide.",
+    "What should I handle more gently? Tell me what you really need.",
+    "What should I handle more gently? Give me a real example.",
+    "What should I handle more gently? Say it like I am really listening.",
+    "What are you afraid I might misunderstand? Answer slowly and honestly.",
+    "What are you afraid I might misunderstand? Say the part you usually hide.",
+    "What are you afraid I might misunderstand? Tell me what you really need.",
+    "What are you afraid I might misunderstand? Give me a real example.",
+    "What are you afraid I might misunderstand? Say it like I am really listening.",
+    "What does trust with me mean to you? Answer slowly and honestly.",
+    "What does trust with me mean to you? Say the part you usually hide.",
+    "What does trust with me mean to you? Tell me what you really need.",
+    "What does trust with me mean to you? Give me a real example.",
+    "What does trust with me mean to you? Say it like I am really listening.",
+    "What should we talk about more? Answer slowly and honestly.",
+    "What should we talk about more? Say the part you usually hide.",
+    "What should we talk about more? Tell me what you really need.",
+    "What should we talk about more? Give me a real example.",
+    "What should we talk about more? Say it like I am really listening.",
+    "What makes you feel emotionally close to me? Answer slowly and honestly.",
+    "What makes you feel emotionally close to me? Say the part you usually hide.",
+    "What makes you feel emotionally close to me? Tell me what you really need.",
+    "What makes you feel emotionally close to me? Give me a real example.",
+    "What makes you feel emotionally close to me? Say it like I am really listening.",
+    "What wound do you want love to be patient with? Answer slowly and honestly.",
+    "What wound do you want love to be patient with? Say the part you usually hide.",
+    "What wound do you want love to be patient with? Tell me what you really need.",
+    "What wound do you want love to be patient with? Give me a real example.",
+    "What wound do you want love to be patient with? Say it like I am really listening."
+  ],
+  "truth": [
+    "What was your honest first feeling about me? No filter.",
+    "What was your honest first feeling about me? Be gentle but real.",
+    "What was your honest first feeling about me? Don’t avoid the answer.",
+    "What was your honest first feeling about me? Give me an example.",
+    "What was your honest first feeling about me? Say what you actually think.",
+    "What did you notice about me before I knew? No filter.",
+    "What did you notice about me before I knew? Be gentle but real.",
+    "What did you notice about me before I knew? Don’t avoid the answer.",
+    "What did you notice about me before I knew? Give me an example.",
+    "What did you notice about me before I knew? Say what you actually think.",
+    "What do you think I overthink the most? No filter.",
+    "What do you think I overthink the most? Be gentle but real.",
+    "What do you think I overthink the most? Don’t avoid the answer.",
+    "What do you think I overthink the most? Give me an example.",
+    "What do you think I overthink the most? Say what you actually think.",
+    "What do I do when I am upset? No filter.",
+    "What do I do when I am upset? Be gentle but real.",
+    "What do I do when I am upset? Don’t avoid the answer.",
+    "What do I do when I am upset? Give me an example.",
+    "What do I do when I am upset? Say what you actually think.",
+    "What do you wish I stopped doing? No filter.",
+    "What do you wish I stopped doing? Be gentle but real.",
+    "What do you wish I stopped doing? Don’t avoid the answer.",
+    "What do you wish I stopped doing? Give me an example.",
+    "What do you wish I stopped doing? Say what you actually think.",
+    "What do you wish I did more? No filter.",
+    "What do you wish I did more? Be gentle but real.",
+    "What do you wish I did more? Don’t avoid the answer.",
+    "What do you wish I did more? Give me an example.",
+    "What do you wish I did more? Say what you actually think.",
+    "What truth about us do you believe? No filter.",
+    "What truth about us do you believe? Be gentle but real.",
+    "What truth about us do you believe? Don’t avoid the answer.",
+    "What truth about us do you believe? Give me an example.",
+    "What truth about us do you believe? Say what you actually think.",
+    "What do I need to hear more often? No filter.",
+    "What do I need to hear more often? Be gentle but real.",
+    "What do I need to hear more often? Don’t avoid the answer.",
+    "What do I need to hear more often? Give me an example.",
+    "What do I need to hear more often? Say what you actually think.",
+    "What do I hide that you still notice? No filter.",
+    "What do I hide that you still notice? Be gentle but real.",
+    "What do I hide that you still notice? Don’t avoid the answer.",
+    "What do I hide that you still notice? Give me an example.",
+    "What do I hide that you still notice? Say what you actually think.",
+    "What makes you feel important to me? No filter.",
+    "What makes you feel important to me? Be gentle but real.",
+    "What makes you feel important to me? Don’t avoid the answer.",
+    "What makes you feel important to me? Give me an example.",
+    "What makes you feel important to me? Say what you actually think.",
+    "What do I pretend not to care about? No filter.",
+    "What do I pretend not to care about? Be gentle but real.",
+    "What do I pretend not to care about? Don’t avoid the answer.",
+    "What do I pretend not to care about? Give me an example.",
+    "What do I pretend not to care about? Say what you actually think.",
+    "What am I secretly sensitive about? No filter.",
+    "What am I secretly sensitive about? Be gentle but real.",
+    "What am I secretly sensitive about? Don’t avoid the answer.",
+    "What am I secretly sensitive about? Give me an example.",
+    "What am I secretly sensitive about? Say what you actually think.",
+    "What did you learn about me slowly? No filter.",
+    "What did you learn about me slowly? Be gentle but real.",
+    "What did you learn about me slowly? Don’t avoid the answer.",
+    "What did you learn about me slowly? Give me an example.",
+    "What did you learn about me slowly? Say what you actually think.",
+    "What truth about you should I know? No filter.",
+    "What truth about you should I know? Be gentle but real.",
+    "What truth about you should I know? Don’t avoid the answer.",
+    "What truth about you should I know? Give me an example.",
+    "What truth about you should I know? Say what you actually think.",
+    "What should I ask you more often? No filter.",
+    "What should I ask you more often? Be gentle but real.",
+    "What should I ask you more often? Don’t avoid the answer.",
+    "What should I ask you more often? Give me an example.",
+    "What should I ask you more often? Say what you actually think.",
+    "What do I misunderstand about myself? No filter.",
+    "What do I misunderstand about myself? Be gentle but real.",
+    "What do I misunderstand about myself? Don’t avoid the answer.",
+    "What do I misunderstand about myself? Give me an example.",
+    "What do I misunderstand about myself? Say what you actually think.",
+    "What do I do better than I realize? No filter.",
+    "What do I do better than I realize? Be gentle but real.",
+    "What do I do better than I realize? Don’t avoid the answer.",
+    "What do I do better than I realize? Give me an example.",
+    "What do I do better than I realize? Say what you actually think.",
+    "What do I need to improve in love? No filter.",
+    "What do I need to improve in love? Be gentle but real.",
+    "What do I need to improve in love? Don’t avoid the answer.",
+    "What do I need to improve in love? Give me an example.",
+    "What do I need to improve in love? Say what you actually think.",
+    "What am I afraid to admit? No filter.",
+    "What am I afraid to admit? Be gentle but real.",
+    "What am I afraid to admit? Don’t avoid the answer.",
+    "What am I afraid to admit? Give me an example.",
+    "What am I afraid to admit? Say what you actually think.",
+    "What honest thing do you want to tell me tonight? No filter.",
+    "What honest thing do you want to tell me tonight? Be gentle but real.",
+    "What honest thing do you want to tell me tonight? Don’t avoid the answer.",
+    "What honest thing do you want to tell me tonight? Give me an example.",
+    "What honest thing do you want to tell me tonight? Say what you actually think."
+  ],
+  "future": [
+    "What future do you imagine with me? Describe it clearly.",
+    "What future do you imagine with me? Don’t be scared to dream.",
+    "What future do you imagine with me? Make it feel real.",
+    "What future do you imagine with me? Tell me why it matters.",
+    "What future do you imagine with me? Say what you truly want.",
+    "Where do you want us to travel together? Describe it clearly.",
+    "Where do you want us to travel together? Don’t be scared to dream.",
+    "Where do you want us to travel together? Make it feel real.",
+    "Where do you want us to travel together? Tell me why it matters.",
+    "Where do you want us to travel together? Say what you truly want.",
+    "What would our perfect home feel like? Describe it clearly.",
+    "What would our perfect home feel like? Don’t be scared to dream.",
+    "What would our perfect home feel like? Make it feel real.",
+    "What would our perfect home feel like? Tell me why it matters.",
+    "What would our perfect home feel like? Say what you truly want.",
+    "What promise should we never break? Describe it clearly.",
+    "What promise should we never break? Don’t be scared to dream.",
+    "What promise should we never break? Make it feel real.",
+    "What promise should we never break? Tell me why it matters.",
+    "What promise should we never break? Say what you truly want.",
+    "What should we still do years from now? Describe it clearly.",
+    "What should we still do years from now? Don’t be scared to dream.",
+    "What should we still do years from now? Make it feel real.",
+    "What should we still do years from now? Tell me why it matters.",
+    "What should we still do years from now? Say what you truly want.",
+    "How should we handle hard days later? Describe it clearly.",
+    "How should we handle hard days later? Don’t be scared to dream.",
+    "How should we handle hard days later? Make it feel real.",
+    "How should we handle hard days later? Tell me why it matters.",
+    "How should we handle hard days later? Say what you truly want.",
+    "What dream should we chase together? Describe it clearly.",
+    "What dream should we chase together? Don’t be scared to dream.",
+    "What dream should we chase together? Make it feel real.",
+    "What dream should we chase together? Tell me why it matters.",
+    "What dream should we chase together? Say what you truly want.",
+    "What kind of life would make us peaceful? Describe it clearly.",
+    "What kind of life would make us peaceful? Don’t be scared to dream.",
+    "What kind of life would make us peaceful? Make it feel real.",
+    "What kind of life would make us peaceful? Tell me why it matters.",
+    "What kind of life would make us peaceful? Say what you truly want.",
+    "What should we build together? Describe it clearly.",
+    "What should we build together? Don’t be scared to dream.",
+    "What should we build together? Make it feel real.",
+    "What should we build together? Tell me why it matters.",
+    "What should we build together? Say what you truly want.",
+    "What would make you proud of us later? Describe it clearly.",
+    "What would make you proud of us later? Don’t be scared to dream.",
+    "What would make you proud of us later? Make it feel real.",
+    "What would make you proud of us later? Tell me why it matters.",
+    "What would make you proud of us later? Say what you truly want.",
+    "What tradition should we create? Describe it clearly.",
+    "What tradition should we create? Don’t be scared to dream.",
+    "What tradition should we create? Make it feel real.",
+    "What tradition should we create? Tell me why it matters.",
+    "What tradition should we create? Say what you truly want.",
+    "What should we look like when we are older? Describe it clearly.",
+    "What should we look like when we are older? Don’t be scared to dream.",
+    "What should we look like when we are older? Make it feel real.",
+    "What should we look like when we are older? Tell me why it matters.",
+    "What should we look like when we are older? Say what you truly want.",
+    "What problem should we learn to handle better? Describe it clearly.",
+    "What problem should we learn to handle better? Don’t be scared to dream.",
+    "What problem should we learn to handle better? Make it feel real.",
+    "What problem should we learn to handle better? Tell me why it matters.",
+    "What problem should we learn to handle better? Say what you truly want.",
+    "What future memory do you want with me? Describe it clearly.",
+    "What future memory do you want with me? Don’t be scared to dream.",
+    "What future memory do you want with me? Make it feel real.",
+    "What future memory do you want with me? Tell me why it matters.",
+    "What future memory do you want with me? Say what you truly want.",
+    "What should we never stop doing for each other? Describe it clearly.",
+    "What should we never stop doing for each other? Don’t be scared to dream.",
+    "What should we never stop doing for each other? Make it feel real.",
+    "What should we never stop doing for each other? Tell me why it matters.",
+    "What should we never stop doing for each other? Say what you truly want.",
+    "What goal would make us stronger? Describe it clearly.",
+    "What goal would make us stronger? Don’t be scared to dream.",
+    "What goal would make us stronger? Make it feel real.",
+    "What goal would make us stronger? Tell me why it matters.",
+    "What goal would make us stronger? Say what you truly want.",
+    "What kind of love do you want us to become? Describe it clearly.",
+    "What kind of love do you want us to become? Don’t be scared to dream.",
+    "What kind of love do you want us to become? Make it feel real.",
+    "What kind of love do you want us to become? Tell me why it matters.",
+    "What kind of love do you want us to become? Say what you truly want.",
+    "What do you hope people notice about us? Describe it clearly.",
+    "What do you hope people notice about us? Don’t be scared to dream.",
+    "What do you hope people notice about us? Make it feel real.",
+    "What do you hope people notice about us? Tell me why it matters.",
+    "What do you hope people notice about us? Say what you truly want.",
+    "What should we save money for together? Describe it clearly.",
+    "What should we save money for together? Don’t be scared to dream.",
+    "What should we save money for together? Make it feel real.",
+    "What should we save money for together? Tell me why it matters.",
+    "What should we save money for together? Say what you truly want.",
+    "What future version of me do you hope to see? Describe it clearly.",
+    "What future version of me do you hope to see? Don’t be scared to dream.",
+    "What future version of me do you hope to see? Make it feel real.",
+    "What future version of me do you hope to see? Tell me why it matters.",
+    "What future version of me do you hope to see? Say what you truly want."
+  ],
+  "cute": [
+    "What is the cutest thing I do? Don’t be shy.",
+    "What is the cutest thing I do? Tell me the tiny detail.",
+    "What is the cutest thing I do? Say it like you are smiling.",
+    "What is the cutest thing I do? Give me the real example.",
+    "What is the cutest thing I do? Make it sweet but honest.",
+    "When do I look the most adorable to you? Don’t be shy.",
+    "When do I look the most adorable to you? Tell me the tiny detail.",
+    "When do I look the most adorable to you? Say it like you are smiling.",
+    "When do I look the most adorable to you? Give me the real example.",
+    "When do I look the most adorable to you? Make it sweet but honest.",
+    "What little habit of mine do you secretly love? Don’t be shy.",
+    "What little habit of mine do you secretly love? Tell me the tiny detail.",
+    "What little habit of mine do you secretly love? Say it like you are smiling.",
+    "What little habit of mine do you secretly love? Give me the real example.",
+    "What little habit of mine do you secretly love? Make it sweet but honest.",
+    "What message from me would make your day? Don’t be shy.",
+    "What message from me would make your day? Tell me the tiny detail.",
+    "What message from me would make your day? Say it like you are smiling.",
+    "What message from me would make your day? Give me the real example.",
+    "What message from me would make your day? Make it sweet but honest.",
+    "What is your favorite way I say your name? Don’t be shy.",
+    "What is your favorite way I say your name? Tell me the tiny detail.",
+    "What is your favorite way I say your name? Say it like you are smiling.",
+    "What is your favorite way I say your name? Give me the real example.",
+    "What is your favorite way I say your name? Make it sweet but honest.",
+    "What small thing I do do you remember? Don’t be shy.",
+    "What small thing I do do you remember? Tell me the tiny detail.",
+    "What small thing I do do you remember? Say it like you are smiling.",
+    "What small thing I do do you remember? Give me the real example.",
+    "What small thing I do do you remember? Make it sweet but honest.",
+    "What do I do that makes you soft? Don’t be shy.",
+    "What do I do that makes you soft? Tell me the tiny detail.",
+    "What do I do that makes you soft? Say it like you are smiling.",
+    "What do I do that makes you soft? Give me the real example.",
+    "What do I do that makes you soft? Make it sweet but honest.",
+    "What is your favorite compliment from me? Don’t be shy.",
+    "What is your favorite compliment from me? Tell me the tiny detail.",
+    "What is your favorite compliment from me? Say it like you are smiling.",
+    "What is your favorite compliment from me? Give me the real example.",
+    "What is your favorite compliment from me? Make it sweet but honest.",
+    "What should I do when you miss me? Don’t be shy.",
+    "What should I do when you miss me? Tell me the tiny detail.",
+    "What should I do when you miss me? Say it like you are smiling.",
+    "What should I do when you miss me? Give me the real example.",
+    "What should I do when you miss me? Make it sweet but honest.",
+    "What cute memory do you have of us? Don’t be shy.",
+    "What cute memory do you have of us? Tell me the tiny detail.",
+    "What cute memory do you have of us? Say it like you are smiling.",
+    "What cute memory do you have of us? Give me the real example.",
+    "What cute memory do you have of us? Make it sweet but honest.",
+    "What is my cutest reaction? Don’t be shy.",
+    "What is my cutest reaction? Tell me the tiny detail.",
+    "What is my cutest reaction? Say it like you are smiling.",
+    "What is my cutest reaction? Give me the real example.",
+    "What is my cutest reaction? Make it sweet but honest.",
+    "What makes you want to hug me? Don’t be shy.",
+    "What makes you want to hug me? Tell me the tiny detail.",
+    "What makes you want to hug me? Say it like you are smiling.",
+    "What makes you want to hug me? Give me the real example.",
+    "What makes you want to hug me? Make it sweet but honest.",
+    "When do I sound the sweetest? Don’t be shy.",
+    "When do I sound the sweetest? Tell me the tiny detail.",
+    "When do I sound the sweetest? Say it like you are smiling.",
+    "When do I sound the sweetest? Give me the real example.",
+    "When do I sound the sweetest? Make it sweet but honest.",
+    "What tiny detail about me do you love? Don’t be shy.",
+    "What tiny detail about me do you love? Tell me the tiny detail.",
+    "What tiny detail about me do you love? Say it like you are smiling.",
+    "What tiny detail about me do you love? Give me the real example.",
+    "What tiny detail about me do you love? Make it sweet but honest.",
+    "What do I do that feels like home? Don’t be shy.",
+    "What do I do that feels like home? Tell me the tiny detail.",
+    "What do I do that feels like home? Say it like you are smiling.",
+    "What do I do that feels like home? Give me the real example.",
+    "What do I do that feels like home? Make it sweet but honest.",
+    "What silly side of me is your favorite? Don’t be shy.",
+    "What silly side of me is your favorite? Tell me the tiny detail.",
+    "What silly side of me is your favorite? Say it like you are smiling.",
+    "What silly side of me is your favorite? Give me the real example.",
+    "What silly side of me is your favorite? Make it sweet but honest.",
+    "What makes you feel cared for? Don’t be shy.",
+    "What makes you feel cared for? Tell me the tiny detail.",
+    "What makes you feel cared for? Say it like you are smiling.",
+    "What makes you feel cared for? Give me the real example.",
+    "What makes you feel cared for? Make it sweet but honest.",
+    "What cute thing should we do together? Don’t be shy.",
+    "What cute thing should we do together? Tell me the tiny detail.",
+    "What cute thing should we do together? Say it like you are smiling.",
+    "What cute thing should we do together? Give me the real example.",
+    "What cute thing should we do together? Make it sweet but honest.",
+    "What nickname fits me best? Don’t be shy.",
+    "What nickname fits me best? Tell me the tiny detail.",
+    "What nickname fits me best? Say it like you are smiling.",
+    "What nickname fits me best? Give me the real example.",
+    "What nickname fits me best? Make it sweet but honest.",
+    "When did you think I was too cute? Don’t be shy.",
+    "When did you think I was too cute? Tell me the tiny detail.",
+    "When did you think I was too cute? Say it like you are smiling.",
+    "When did you think I was too cute? Give me the real example.",
+    "When did you think I was too cute? Make it sweet but honest."
+  ],
+  "random": [
+    "Who is more dramatic between us? Explain your answer.",
+    "Who is more dramatic between us? Give proof.",
+    "Who is more dramatic between us? Answer quickly.",
+    "Who is more dramatic between us? Defend your answer.",
+    "Who is more dramatic between us? Make it funny.",
+    "Who would get lost first in a new city? Explain your answer.",
+    "Who would get lost first in a new city? Give proof.",
+    "Who would get lost first in a new city? Answer quickly.",
+    "Who would get lost first in a new city? Defend your answer.",
+    "Who would get lost first in a new city? Make it funny.",
+    "Who spends money faster? Explain your answer.",
+    "Who spends money faster? Give proof.",
+    "Who spends money faster? Answer quickly.",
+    "Who spends money faster? Defend your answer.",
+    "Who spends money faster? Make it funny.",
+    "Who apologizes first? Explain your answer.",
+    "Who apologizes first? Give proof.",
+    "Who apologizes first? Answer quickly.",
+    "Who apologizes first? Defend your answer.",
+    "Who apologizes first? Make it funny.",
+    "Who is more stubborn? Explain your answer.",
+    "Who is more stubborn? Give proof.",
+    "Who is more stubborn? Answer quickly.",
+    "Who is more stubborn? Defend your answer.",
+    "Who is more stubborn? Make it funny.",
+    "Who gives better advice? Explain your answer.",
+    "Who gives better advice? Give proof.",
+    "Who gives better advice? Answer quickly.",
+    "Who gives better advice? Defend your answer.",
+    "Who gives better advice? Make it funny.",
+    "Who would win a cooking challenge? Explain your answer.",
+    "Who would win a cooking challenge? Give proof.",
+    "Who would win a cooking challenge? Answer quickly.",
+    "Who would win a cooking challenge? Defend your answer.",
+    "Who would win a cooking challenge? Make it funny.",
+    "Who would sleep through an important alarm? Explain your answer.",
+    "Who would sleep through an important alarm? Give proof.",
+    "Who would sleep through an important alarm? Answer quickly.",
+    "Who would sleep through an important alarm? Defend your answer.",
+    "Who would sleep through an important alarm? Make it funny.",
+    "Who would cry first in a sad movie? Explain your answer.",
+    "Who would cry first in a sad movie? Give proof.",
+    "Who would cry first in a sad movie? Answer quickly.",
+    "Who would cry first in a sad movie? Defend your answer.",
+    "Who would cry first in a sad movie? Make it funny.",
+    "Who would plan a better date? Explain your answer.",
+    "Who would plan a better date? Give proof.",
+    "Who would plan a better date? Answer quickly.",
+    "Who would plan a better date? Defend your answer.",
+    "Who would plan a better date? Make it funny.",
+    "Who would survive longer without their phone? Explain your answer.",
+    "Who would survive longer without their phone? Give proof.",
+    "Who would survive longer without their phone? Answer quickly.",
+    "Who would survive longer without their phone? Defend your answer.",
+    "Who would survive longer without their phone? Make it funny.",
+    "Who would accidentally start drama? Explain your answer.",
+    "Who would accidentally start drama? Give proof.",
+    "Who would accidentally start drama? Answer quickly.",
+    "Who would accidentally start drama? Defend your answer.",
+    "Who would accidentally start drama? Make it funny.",
+    "Who forgets why they walked into a room? Explain your answer.",
+    "Who forgets why they walked into a room? Give proof.",
+    "Who forgets why they walked into a room? Answer quickly.",
+    "Who forgets why they walked into a room? Defend your answer.",
+    "Who forgets why they walked into a room? Make it funny.",
+    "Who would be better at babysitting? Explain your answer.",
+    "Who would be better at babysitting? Give proof.",
+    "Who would be better at babysitting? Answer quickly.",
+    "Who would be better at babysitting? Defend your answer.",
+    "Who would be better at babysitting? Make it funny.",
+    "Who would win a dance battle? Explain your answer.",
+    "Who would win a dance battle? Give proof.",
+    "Who would win a dance battle? Answer quickly.",
+    "Who would win a dance battle? Defend your answer.",
+    "Who would win a dance battle? Make it funny.",
+    "Who would become famous for something random? Explain your answer.",
+    "Who would become famous for something random? Give proof.",
+    "Who would become famous for something random? Answer quickly.",
+    "Who would become famous for something random? Defend your answer.",
+    "Who would become famous for something random? Make it funny.",
+    "Who eats the other person’s food first? Explain your answer.",
+    "Who eats the other person’s food first? Give proof.",
+    "Who eats the other person’s food first? Answer quickly.",
+    "Who eats the other person’s food first? Defend your answer.",
+    "Who eats the other person’s food first? Make it funny.",
+    "Who stays calmer in an emergency? Explain your answer.",
+    "Who stays calmer in an emergency? Give proof.",
+    "Who stays calmer in an emergency? Answer quickly.",
+    "Who stays calmer in an emergency? Defend your answer.",
+    "Who stays calmer in an emergency? Make it funny.",
+    "Who makes worse decisions at midnight? Explain your answer.",
+    "Who makes worse decisions at midnight? Give proof.",
+    "Who makes worse decisions at midnight? Answer quickly.",
+    "Who makes worse decisions at midnight? Defend your answer.",
+    "Who makes worse decisions at midnight? Make it funny.",
+    "Who takes longer to get ready? Explain your answer.",
+    "Who takes longer to get ready? Give proof.",
+    "Who takes longer to get ready? Answer quickly.",
+    "Who takes longer to get ready? Defend your answer.",
+    "Who takes longer to get ready? Make it funny."
+  ]
+};
+let decks = {};
+
+function shuffle(arr){
+  const a=[...arr];
+  for(let i=a.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+function resetDeck(cat){
+  decks[cat]=shuffle(banks[cat]);
+}
+
+Object.keys(banks).forEach(resetDeck);
+
+function autoNames(){
+  document.getElementById("p1name").value="Me";
+  document.getElementById("p2name").value="My Love";
+}
+
+function loadPhoto(e,num){
+  const file=e.target.files[0];
+  if(!file)return;
+  const url=URL.createObjectURL(file);
+  if(num===1){
+    document.getElementById("p1preview").src=url;
+    document.getElementById("p1game").src=url;
+  }else{
+    document.getElementById("p2preview").src=url;
+    document.getElementById("p2game").src=url;
+  }
+}
+
+function loadBackground(e){
+  const file=e.target.files[0];
+  if(!file)return;
+  const url=URL.createObjectURL(file);
+  const bg=document.getElementById("bg");
+  bg.innerHTML="";
+  if(file.type.startsWith("video")){
+    const v=document.createElement("video");
+    v.src=url;v.autoplay=true;v.loop=true;v.muted=true;v.playsInline=true;
+    bg.appendChild(v);
+  }else{
+    const img=document.createElement("img");
+    img.src=url;
+    bg.appendChild(img);
+  }
+}
+
+function startGame(){
+  p1=document.getElementById("p1name").value.trim()||"You";
+  p2=document.getElementById("p2name").value.trim()||"Her";
+  document.getElementById("p1label").textContent=p1;
+  document.getElementById("p2label").textContent=p2;
+  document.getElementById("setup").classList.add("hide");
+  document.getElementById("game").classList.remove("hide");
+  updateScore();
+  nextQuestion();
+}
+
+function setCategory(cat,el){
+  category=cat;
+  document.querySelectorAll(".cat").forEach(b=>b.classList.remove("active"));
+  el.classList.add("active");
+  document.getElementById("catText").textContent=cat.charAt(0).toUpperCase()+cat.slice(1);
+
+  // Category change should NOT increase the round.
+  showQuestion(false);
+}
+
+function showQuestion(increaseRound=true){
+  if(!decks[category] || decks[category].length===0){
+    resetDeck(category);
+    addHistory("All 100 " + category + " questions finished. Deck reshuffled.");
+  }
+
+  currentQuestion=decks[category].pop();
+
+  const q=document.getElementById("question");
+  q.style.animation="none";
+  q.offsetHeight;
+  q.style.animation="pop .25s ease";
+  q.textContent=currentQuestion;
+
+  document.getElementById("roundText").textContent="Round "+round;
+  document.getElementById("catText").textContent=category.charAt(0).toUpperCase()+category.slice(1)+" • "+decks[category].length+" left";
+
+  if(increaseRound){
+    round++;
+  }
+
+  if(autoRead)readQuestion();
+}
+
+function nextQuestion(){
+  showQuestion(true);
+}
+
+function skipQuestion(){
+  addHistory("Skipped a question.");
+  nextQuestion();
+}
+
+function addScore(player){
+  if(player===1){s1++;addHistory(p1+" got +1");}
+  else{s2++;addHistory(p2+" got +1");}
+  updateScore();
+}
+
+function updateScore(){
+  document.getElementById("p1score").textContent=s1;
+  document.getElementById("p2score").textContent=s2;
+  let text="No winner yet";
+  if(s1>s2)text=p1+" is winning 💪";
+  if(s2>s1)text=p2+" is winning 💗";
+  if(s1===s2&&s1>0)text="It’s tied right now 😭";
+  document.getElementById("winner").textContent=text;
+}
+
+function resetScore(){
+  s1=0;s2=0;updateScore();addHistory("Scores reset.");
+}
+
+function restartGame(){
+  s1=0;s2=0;round=1;
+  Object.keys(banks).forEach(resetDeck);
+  document.getElementById("history").innerHTML="";
+  updateScore();nextQuestion();
+}
+
+function addHistory(text){
+  const h=document.getElementById("history");
+  h.innerHTML="• "+text+"<br>"+h.innerHTML;
+}
+
+function readQuestion(){
+  if(!("speechSynthesis" in window)){
+    alert("Voice reading is not supported on this browser.");
+    return;
+  }
+  speechSynthesis.cancel();
+  const msg=new SpeechSynthesisUtterance(currentQuestion);
+  msg.lang="en-US";msg.rate=.92;msg.pitch=1;
+  speechSynthesis.speak(msg);
+}
+
+function toggleAutoRead(){
+  autoRead=!autoRead;
+  document.getElementById("autoReadBtn").textContent=autoRead?"Auto Voice: On":"Auto Voice: Off";
+}
+</script>
+</body>
+</html>
